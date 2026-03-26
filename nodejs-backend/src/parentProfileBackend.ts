@@ -57,8 +57,8 @@ export class ParentProfileBackend {
         return new ParentProfileBackend(this.allParentProfiles, this.allInvoices, [...this.allPaymentMethods, { id: this.allPaymentMethods.length + 1, parentId, method, isActive }]);
     }
 
-    deletePaymentMethod(parentId: number, method: string) {
-        return new ParentProfileBackend(this.allParentProfiles, this.allInvoices, this.allPaymentMethods.filter(paymentMethod => !(paymentMethod.parentId === parentId && paymentMethod.method === method)));
+    deletePaymentMethod(parentId: number, methodId: number) {
+        return new ParentProfileBackend(this.allParentProfiles, this.allInvoices, this.allPaymentMethods.filter(paymentMethod => !(paymentMethod.parentId === parentId && paymentMethod.id === methodId)));
     }
 
     setActivePaymentMethod(parentId: number, paymentMethodId: number) {

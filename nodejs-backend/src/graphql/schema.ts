@@ -32,6 +32,6 @@ export const typeDefs = gql`
   type Mutation {
     addPaymentMethod(parentId: Long!, method: String!): PaymentMethod
     setActivePaymentMethod(parentId: Long!, methodId: Long!): PaymentMethod
-    deletePaymentMethod(parentId: Long!, method: String!): Boolean
+    deletePaymentMethod(parentId: Long!, methodId: Long!): Boolean
   }
 `;

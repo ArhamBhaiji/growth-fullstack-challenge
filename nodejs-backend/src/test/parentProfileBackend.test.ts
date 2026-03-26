@@ -75,7 +75,7 @@ describe("Parent profile backend", () => {
       expect(parentProfileBackend
         .createParentProfile("Alice", "Bob")
         .createPaymentMethod(1, "Credit Card", true)
-        .deletePaymentMethod(1, "Credit Card")
+        .deletePaymentMethod(1, 1)
         .paymentMethods(1))
       .not.toContainEqual({ id: 1, parentId: 1, method: "Credit Card", isActive: true })
     });

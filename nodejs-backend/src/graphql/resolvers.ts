@@ -37,10 +37,10 @@ export const resolvers = {
     },
     deletePaymentMethod: async (
       _: any,
-      { parentId, method }: { parentId: number; method: string },
+      { parentId, methodId }: { parentId: number; methodId: number },
     ) => {
       const initialParentProfileBackend = new ParentProfileBackend([], [], await profileRepository.retrievePaymentMethods(parentId));
-      const parentProfileBackend = initialParentProfileBackend.deletePaymentMethod(parentId, method);
+      const parentProfileBackend = initialParentProfileBackend.deletePaymentMethod(parentId, methodId);
 
       await Promise.all(initialParentProfileBackend.paymentMethods(parentId)
         .filter(paymentMethod => !parentProfileBackend.paymentMethods(parentId).includes(paymentMethod))
