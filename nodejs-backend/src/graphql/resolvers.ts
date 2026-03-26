@@ -4,6 +4,12 @@ import { ParentProfileBackend } from "../parentProfileBackend";
 
 const profileRepository = new ProfileRepository();
 
+const canDeletePaymentMethod = (paymentMethods: any[], methodId: number): boolean => {
+  const methodToDelete = paymentMethods.find(m => m.id === methodId);
+  const activeCount = paymentMethods.filter(m => m.isActive).length;
+  return !(methodToDelete?.isActive && activeCount === 1);
+};
+
 export const resolvers = {
   Long: GraphQLLong,
   Query: {
@@ -39,7 +45,13 @@ export const resolvers = {
       _: any,
       { parentId, methodId }: { parentId: number; methodId: number },
     ) => {
-      const initialParentProfileBackend = new ParentProfileBackend([], [], await profileRepository.retrievePaymentMethods(parentId));
+      const paymentMethods = await profileRepository.retrievePaymentMethods(parentId);
+      
+      if (!canDeletePaymentMethod(paymentMethods, methodId)) {
+        throw new Error("Cannot delete the last active payment method. There must always be at least one active payment method.");
+      }
+
+      const initialParentProfileBackend = new ParentProfileBackend([], [], paymentMethods);
       const parentProfileBackend = initialParentProfileBackend.deletePaymentMethod(parentId, methodId);
 
       await Promise.all(initialParentProfileBackend.paymentMethods(parentId)

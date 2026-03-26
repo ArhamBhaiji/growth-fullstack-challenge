@@ -15,7 +15,7 @@ export class ProfileRepository {
   }
 
   async retrievePaymentMethods(parentId: number): Promise<PaymentMethod[]> {
-    const sql = "SELECT * FROM payment_methods WHERE parent_id = ?";
+    const sql = "SELECT * FROM payment_methods WHERE parent_id = ? ORDER BY is_active DESC, created_at DESC";
     const results = await query(sql, [parentId]);
     return results.map((r) => ({
       id: r.id,

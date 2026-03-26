@@ -114,6 +114,7 @@ const DELETE_PAYMENT_METHOD = gql`
 const PaymentMethods = ({ parentId }: { parentId: number }) => {
   const classes = useStyles();
   const [newMethod, setNewMethod] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { loading, data } = useQuery(GET_PAYMENT_METHODS, {
     variables: { parentId },
   });
@@ -142,6 +143,7 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
         variables: { parentId, method: newMethod.trim() },
       }).then(() => {
         setNewMethod("");
+        setError(null);
       });
     }
   };
@@ -149,6 +151,8 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
   const handleDeleteMethod = (methodId: number) => {
     deletePaymentMethod({
       variables: { parentId, methodId },
+    }).catch((err) => {
+      setError(err.message || "Failed to delete payment method");
     });
   };
 
@@ -162,6 +166,11 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
           </Typography>
         </div>
       </div>
+      {error && (
+        <Typography style={{ color: "red", marginBottom: "16px" }}>
+          {error}
+        </Typography>
+      )}
       <form onSubmit={handleAddMethod} className={classes.addMethodForm}>
         <TextField
           className={classes.addMethodInput}
@@ -214,6 +223,8 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
               className={classes.deleteButton}
               onClick={() => handleDeleteMethod(method.id)}
               size="small"
+              disabled={method.isActive && data?.paymentMethods.filter((m: any) => m.isActive).length === 1}
+              title={method.isActive && data?.paymentMethods.filter((m: any) => m.isActive).length === 1 ? "Cannot delete the last active payment method" : ""}
             >
               <DeleteIcon />
             </IconButton>
