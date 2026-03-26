@@ -9,6 +9,7 @@ export interface PaymentMethod {
     parentId: number;
     method: string;
     isActive: boolean;
+    createdAt?: string;
 }
   
 export  interface Invoice {

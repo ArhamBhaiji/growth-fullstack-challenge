@@ -80,6 +80,7 @@ export const GET_PAYMENT_METHODS = gql`
       id
       method
       isActive
+      createdAt
     }
   }
 `;
@@ -187,24 +188,28 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
             </ListItemIcon>
             <ListItemText
               primary={method.method}
-              secondary={method.isActive ? "Active" : "Inactive"}
+              secondary={
+                <Typography variant="caption" style={{ color: "gray" }}>
+                  Created {new Date(method.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                </Typography>
+              }
               primaryTypographyProps={{ className: classes.primaryText }}
-              secondaryTypographyProps={{
-                className: method.isActive
-                  ? classes.activeText
-                  : classes.inactiveText,
-              }}
             />
-            {!method.isActive && (
-              <Button
-                variant="contained"
-                className={classes.button}
-                onClick={() => handleActivate(method.id)}
-                size="small"
-              >
-                Activate
-              </Button>
-            )}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginRight: "16px" }}>
+              {!method.isActive && (
+                <Button
+                  variant="contained"
+                  className={classes.button}
+                  onClick={() => handleActivate(method.id)}
+                  size="small"
+                >
+                  Activate
+                </Button>
+              )}
+              <Typography variant="body2" style={{ marginTop: "8px", color: method.isActive ? "green" : "red" }}>
+                {method.isActive ? "Active" : "Inactive"}
+              </Typography>
+            </div>
             <IconButton
               className={classes.deleteButton}
               onClick={() => handleDeleteMethod(method.id)}

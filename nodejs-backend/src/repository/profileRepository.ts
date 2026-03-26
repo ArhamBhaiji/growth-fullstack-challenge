@@ -22,6 +22,7 @@ export class ProfileRepository {
       parentId: r.parent_id,
       method: r.method,
       isActive: r.is_active,
+      createdAt: r.created_at.toISOString(),
     }));
   }
 

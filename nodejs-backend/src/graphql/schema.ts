@@ -14,6 +14,7 @@ export const typeDefs = gql`
     parentId: Int!
     method: String!
     isActive: Boolean!
+    createdAt: String!
   }
 
   type Invoice {
