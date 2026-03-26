@@ -223,8 +223,8 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
               className={classes.deleteButton}
               onClick={() => handleDeleteMethod(method.id)}
               size="small"
-              disabled={method.isActive && data?.paymentMethods.filter((m: any) => m.isActive).length === 1}
-              title={method.isActive && data?.paymentMethods.filter((m: any) => m.isActive).length === 1 ? "Cannot delete the last active payment method" : ""}
+              disabled={method.isActive}
+              title={method.isActive ? "Cannot delete an active payment method" : ""}
             >
               <DeleteIcon />
             </IconButton>

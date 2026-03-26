@@ -5,8 +5,16 @@ import { ParentProfileBackend, PaymentMethod } from "../parentProfileBackend";
 const profileRepository = new ProfileRepository();
 
 const canDeletePaymentMethod = (paymentMethods: any[], methodId: number): boolean => {
-  const methodToDelete = paymentMethods.find(m => m.id === methodId);
-  const activeCount = paymentMethods.filter(m => m.isActive).length;
+  let methodToDelete: PaymentMethod | undefined;
+  let activeCount = 0;
+
+  for (const m of paymentMethods) {
+    if (m.id === methodId) methodToDelete = m;
+    if (m.isActive) activeCount++;
+
+    if (activeCount > 1 && methodToDelete) return true;
+  }
+
   return !(methodToDelete?.isActive && activeCount === 1);
 };
 
@@ -37,8 +45,16 @@ export const resolvers = {
       { parentId, methodId }: { parentId: number; methodId: number },
     ) => {
       const paymentMethods = await profileRepository.retrievePaymentMethods(parentId);
-      const oldActive = paymentMethods.find(m => m.isActive);
-      const newActive = paymentMethods.find(m => m.id === methodId);
+
+      let oldActive: PaymentMethod | undefined;
+      let newActive: PaymentMethod | undefined;
+
+      for (const m of paymentMethods) {
+        if (m.isActive) oldActive = m;
+        if (m.id === methodId) newActive = m;
+      }
+
+      if (!newActive) return null;
 
       const updates: PaymentMethod[] = [];
 
@@ -47,20 +63,15 @@ export const resolvers = {
         updates.push(oldActive);
       }
 
-      if (newActive) {
-        newActive.isActive = true;
-        updates.push(newActive);
-      }
+      newActive.isActive = true;
+      updates.push(newActive);
 
-      if (updates.length > 0) {
-        await profileRepository.updatePaymentMethods(updates);
-      }
+      await Promise.all([
+        profileRepository.updatePaymentMethods(updates),
+        profileRepository.logAudit(parentId, "ACTIVATE", methodId, { isActive: true }),
+      ]);
 
-      if (newActive) {
-        await profileRepository.logAudit(parentId, "ACTIVATE", methodId, { isActive: true });
-      }
-
-      return newActive || null;
+      return newActive;
     },
     deletePaymentMethod: async (
       _: any,
@@ -68,7 +79,7 @@ export const resolvers = {
     ) => {
       const paymentMethods = await profileRepository.retrievePaymentMethods(parentId);
       const methodToDelete = paymentMethods.find(m => m.id === methodId);
-      
+
       if (!canDeletePaymentMethod(paymentMethods, methodId)) {
         throw new Error("Cannot delete the last active payment method. There must always be at least one active payment method.");
       }
