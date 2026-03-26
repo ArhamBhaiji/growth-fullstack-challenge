@@ -66,4 +66,9 @@ export class ProfileRepository {
     const [result] = await db.execute<mysql.ResultSetHeader>(sql, [methodId]);
     return result.affectedRows > 0;
   }
+
+  async logAudit(parentId: number, action: string, paymentMethodId: number, changes: any): Promise<void> {
+    const sql = "INSERT INTO audit_logs (parent_id, action, payment_method_id, changes) VALUES (?, ?, ?, ?)";
+    await db.execute(sql, [parentId, action, paymentMethodId, JSON.stringify(changes)]);
+  }
 }
