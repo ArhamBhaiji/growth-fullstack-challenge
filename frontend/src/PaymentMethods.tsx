@@ -111,6 +111,27 @@ const DELETE_PAYMENT_METHOD = gql`
   }
 `;
 
+const updatePaymentMethodsCache = (
+  cache: any,
+  parentId: number,
+  updater: (methods: any[]) => any[]
+) => {
+  const existing: any = cache.readQuery({
+    query: GET_PAYMENT_METHODS,
+    variables: { parentId },
+  });
+
+  if (!existing) return;
+
+  cache.writeQuery({
+    query: GET_PAYMENT_METHODS,
+    variables: { parentId },
+    data: {
+      paymentMethods: updater(existing.paymentMethods),
+    },
+  });
+};
+
 const PaymentMethods = ({ parentId }: { parentId: number }) => {
   const classes = useStyles();
   const [newMethod, setNewMethod] = useState("");
@@ -119,13 +140,35 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
     variables: { parentId },
   });
   const [setActivePaymentMethod] = useMutation(SET_ACTIVE_PAYMENT_METHOD, {
-    refetchQueries: [{ query: GET_PAYMENT_METHODS, variables: { parentId } }],
+    update(cache, { data }) {
+      if (!data?.setActivePaymentMethod) return;
+
+      updatePaymentMethodsCache(cache, parentId, (methods) =>
+        methods.map((m) => ({
+          ...m,
+          isActive: m.id === data.setActivePaymentMethod.id,
+        }))
+      );
+    }
   });
+
   const [addPaymentMethod] = useMutation(ADD_PAYMENT_METHOD, {
-    refetchQueries: [{ query: GET_PAYMENT_METHODS, variables: { parentId } }],
+    update(cache, { data }) {
+      if (!data?.addPaymentMethod) return;
+
+      updatePaymentMethodsCache(cache, parentId, (methods) => [
+        ...methods,
+        data.addPaymentMethod,
+      ]);
+    }
   });
+
   const [deletePaymentMethod] = useMutation(DELETE_PAYMENT_METHOD, {
-    refetchQueries: [{ query: GET_PAYMENT_METHODS, variables: { parentId } }],
+    update(cache, _, { variables }) {
+      updatePaymentMethodsCache(cache, parentId, (methods) =>
+        methods.filter((m) => m.id !== variables?.methodId)
+      );
+    }
   });
 
   if (loading) return <p>Loading...</p>;
