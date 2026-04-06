@@ -35,6 +35,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: "16px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
+  listItemColumn: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    marginRight: "16px"
+  },
   icon: {
     marginRight: "20px",
     fontSize: "28px",
@@ -45,9 +51,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.palette.text.primary,
   },
   activeText: {
+    marginTop: "8px",
     color: theme.palette.success.main,
   },
   inactiveText: {
+    marginTop: "8px",
     color: theme.palette.error.main,
   },
   button: {
@@ -247,7 +255,7 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
               }
               primaryTypographyProps={{ className: classes.primaryText }}
             />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginRight: "16px" }}>
+            <div className={classes.listItemColumn}>
               {!method.isActive && (
                 <Button
                   variant="contained"
@@ -258,7 +266,7 @@ const PaymentMethods = ({ parentId }: { parentId: number }) => {
                   Activate
                 </Button>
               )}
-              <Typography variant="body2" style={{ marginTop: "8px", color: method.isActive ? "green" : "red" }}>
+              <Typography variant="body2" className={method.isActive ? classes.activeText : classes.inactiveText}>
                 {method.isActive ? "Active" : "Inactive"}
               </Typography>
             </div>

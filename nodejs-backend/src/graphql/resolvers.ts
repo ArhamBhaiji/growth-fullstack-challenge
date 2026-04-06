@@ -4,18 +4,13 @@ import { ParentProfileBackend, PaymentMethod } from "../parentProfileBackend";
 
 const profileRepository = new ProfileRepository();
 
-const canDeletePaymentMethod = (paymentMethods: any[], methodId: number): boolean => {
-  let methodToDelete: PaymentMethod | undefined;
-  let activeCount = 0;
+const canDeletePaymentMethod = (paymentMethods: PaymentMethod[], methodId: number): boolean => {
+  const methodToDelete = paymentMethods.find(m => m.id === methodId);
+  const activeCount = paymentMethods.filter(m => m.isActive).length;
 
-  for (const m of paymentMethods) {
-    if (m.id === methodId) methodToDelete = m;
-    if (m.isActive) activeCount++;
+  if (!methodToDelete) return false;
 
-    if (activeCount > 1 && methodToDelete) return true;
-  }
-
-  return !(methodToDelete?.isActive && activeCount === 1);
+  return !(methodToDelete.isActive && activeCount === 1);
 };
 
 export const resolvers = {
@@ -46,13 +41,8 @@ export const resolvers = {
     ) => {
       const paymentMethods = await profileRepository.retrievePaymentMethods(parentId);
 
-      let oldActive: PaymentMethod | undefined;
-      let newActive: PaymentMethod | undefined;
-
-      for (const m of paymentMethods) {
-        if (m.isActive) oldActive = m;
-        if (m.id === methodId) newActive = m;
-      }
+      const oldActive = paymentMethods.find(m => m.isActive);
+      const newActive = paymentMethods.find(m => m.id === methodId);
 
       if (!newActive) return null;
 
